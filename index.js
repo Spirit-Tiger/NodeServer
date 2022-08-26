@@ -1,7 +1,8 @@
 import { ApolloServer } from "apollo-server-express";
 import express from "express";
 import mongoose from "mongoose";
-import  graphqlUploadExpress  from "graphql-upload/graphqlUploadExpress.mjs";
+import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
+import cors from "cors";
 
 import typeDefs from "./graphql/typeDefs.js";
 import resolvers from "./graphql/resolvers/index.js";
@@ -26,13 +27,7 @@ mongoose
     const app = express();
 
     app.use(graphqlUploadExpress());
-    app.use(function(req, res, next) {
-      res.header("Access-Control-Allow-Origin", '*');
-      res.header("Access-Control-Allow-Credentials", true);
-      res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-      res.header("Access-Control-Allow-Headers", 'Origin,X-Requested-With,Content-Type,Accept,content-type,application/json');
-      next();
-  });
+    app.use(cors());
 
     server.applyMiddleware({ app });
     await new Promise((r) => app.listen({ port: process.env.PORT || 4000 }, r));
