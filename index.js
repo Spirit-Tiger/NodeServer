@@ -9,6 +9,8 @@ import resolvers from "./graphql/resolvers/index.js";
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  introspection: true,
+  playground: true,
   context: ({ req }) => ({ req }),
 });
 
@@ -26,7 +28,7 @@ mongoose
     app.use(graphqlUploadExpress());
 
     server.applyMiddleware({ app });
-    await new Promise((r) => app.listen({ port:process.env.PORT|| 4000 }, r));
+    await new Promise((r) => app.listen({ port: process.env.PORT || 4000 }, r));
     console.log(
       `🚀 Server ready at http://localhost:4000${server.graphqlPath}`
     );
