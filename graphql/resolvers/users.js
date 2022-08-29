@@ -81,7 +81,7 @@ const usersResolvers = {
         throw new UserInputError("User not found", { errors });
       }
 
-      if (user.status != "Active") {
+      if (user.status != "Active" && user.userRole === "user") {
         errors.general = "Pending Account. Please Verify Your Email!";
         throw new UserInputError("Pending Account. Please Verify Your Email!", {
           errors,
@@ -141,7 +141,10 @@ const usersResolvers = {
         });
       }
       // password = await bcrypt.hash(password, 12);
-      const confToken = generateConfirmationToken(username, email);
+      let confToken = "";
+      if (userRole === "user") {
+        confToken = generateConfirmationToken(username, email);
+      }
 
       const newUser = new User({
         personalId: generatePersonalId(),
@@ -162,13 +165,11 @@ const usersResolvers = {
       });
 
       const res = await newUser.save();
-
       const token = generateToken(res);
-      sendConfirmationEmail(
-        res.username,
-        res.email,
-        res.confirmationCode
-      );
+      if (userRole === "user") {
+        sendConfirmationEmail(res.username, res.email, res.confirmationCode);
+      }
+      
 
       return {
         ...res._doc,
@@ -248,10 +249,10 @@ const usersResolvers = {
         throw new Error(err);
       }
     },
-    async verifyUserEmail(_,{ confirmationCode }) {
+    async verifyUserEmail(_, { confirmationCode }) {
       try {
         const user = await User.findOne({
-          confirmationCode
+          confirmationCode,
         });
 
         if (!user) {
@@ -262,7 +263,6 @@ const usersResolvers = {
         user.status = "Active";
         await user.save();
         return user;
-
       } catch (err) {
         throw new Error(err);
       }
