@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
       orderId: Number,
       createDate: String,
       symbol: String,
-      type: String,
+      orderType: String,
       volume: Number,
       openPrice: Number,
       sl: Number,
@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
       orderId: Number,
       createDate: String,
       symbol: String,
-      type: String,
+      orderType: String,
       volume: Number,
       openPrice: Number,
       closedPrice: Number,
@@ -43,6 +43,14 @@ const userSchema = new mongoose.Schema({
       profit: String,
     },
   ],
-},{ typeKey: '$type' });
+  status: {
+    type: String, 
+    enum: ['Pending', 'Active'],
+    default: 'Pending'
+  },
+  confirmationCode: { 
+    type: String, 
+    unique: true }
+});
 
 export default mongoose.model("User", userSchema);

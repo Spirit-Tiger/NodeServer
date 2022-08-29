@@ -1,8 +1,10 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
 import { UserInputError } from "apollo-server";
 import checkAuth from "../../utils/check-auth.js";
 import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
+import { sendConfirmationEmail } from "../../utils/emailValidation.js";
 
 import User from "../../models/User.js";
 const SECRET_KEY = "my secret";
@@ -20,6 +22,15 @@ function generateToken(user) {
     },
     SECRET_KEY,
     { expiresIn: "30d" }
+  );
+}
+function generateConfirmationToken(username, email) {
+  return jwt.sign(
+    {
+      email,
+      username,
+    },
+    SECRET_KEY
   );
 }
 
@@ -68,6 +79,13 @@ const usersResolvers = {
       if (!user) {
         errors.general = "User not found";
         throw new UserInputError("User not found", { errors });
+      }
+
+      if (user.status != "Active") {
+        errors.general = "Pending Account. Please Verify Your Email!";
+        throw new UserInputError("Pending Account. Please Verify Your Email!", {
+          errors,
+        });
       }
 
       if (password !== user.password) {
@@ -123,6 +141,7 @@ const usersResolvers = {
         });
       }
       // password = await bcrypt.hash(password, 12);
+      const confToken = generateConfirmationToken(username, email);
 
       const newUser = new User({
         personalId: generatePersonalId(),
@@ -139,11 +158,17 @@ const usersResolvers = {
         wallet: "1BQ9qza7fn9snSCyJQB3ZcN46biBtkt4ee",
         userRole,
         createdAt: new Date().toISOString(),
+        confirmationCode: confToken,
       });
 
       const res = await newUser.save();
 
       const token = generateToken(res);
+      sendConfirmationEmail(
+        res.username,
+        res.email,
+        res.confirmationCode
+      );
 
       return {
         ...res._doc,
@@ -203,7 +228,11 @@ const usersResolvers = {
         let conditions = "6303947d01b6e11faa91b3be";
         let options = { multi: true, upsert: true, new: true };
 
-        User.findByIdAndUpdate(conditions,{ $set:{presonalId: generatePersonalId()}} , options);
+        User.findByIdAndUpdate(
+          conditions,
+          { $set: { presonalId: generatePersonalId() } },
+          options
+        );
 
         // users.reduce((acc,user)=>{
         //   if(!user.presonalId)user.presonalId=generatePersonalId()
@@ -215,6 +244,25 @@ const usersResolvers = {
         // users = new newUsers;
         // console.log("newUsers",newUsers);
         // await users.save();
+      } catch (err) {
+        throw new Error(err);
+      }
+    },
+    async verifyUserEmail(_,{ confirmationCode }) {
+      try {
+        const user = await User.findOne({
+          confirmationCode
+        });
+
+        if (!user) {
+          errors.general = "User not found";
+          throw new UserInputError("User not found", { errors });
+        }
+
+        user.status = "Active";
+        await user.save();
+        return user;
+
       } catch (err) {
         throw new Error(err);
       }
