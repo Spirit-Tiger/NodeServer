@@ -6,7 +6,7 @@ const typeDefs = gql`
     orderId: Int!
     createDate: String!
     symbol: String!
-    type: String!
+    orderType: String!
     volume: Float!
     openPrice: Float!
     sl: Float!
@@ -18,7 +18,7 @@ const typeDefs = gql`
     orderId: Int!
     createDate: String!
     symbol: String!
-    type: String!
+    orderType: String!
     volume: Float!
     openPrice: Float!
     closedPrice: Float!
@@ -66,7 +66,7 @@ const typeDefs = gql`
     orderId: Int!
     createDate: String!
     symbol: String!
-    type: String!
+    orderType: String!
     volume: Float!
     openPrice: Float!
     sl: Float!
@@ -84,7 +84,7 @@ const typeDefs = gql`
   input TradeHistoryInput {
     createDate: String!
     symbol: String!
-    type: String!
+    orderType: String!
     volume: Float!
     openPrice: Float!
     closedPrice: Float!
