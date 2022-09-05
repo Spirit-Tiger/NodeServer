@@ -88,13 +88,13 @@ mongoose
   })
   .then(async () => {
     const httpLink = new HttpLink({
-      uri: "http://localhost:4000/graphql",
+      uri: "https://young-everglades-11726.herokuapp.com/graphql",
       fetch,
     });
 
     const wsLink = new GraphQLWsLink(
       createClient({
-        url: "ws://localhost:4000/graphql",
+        url: "ws://young-everglades-11726.herokuapp.com/graphql",
         webSocketImpl: WebSocket,
         options: { reconnect: true },
       })
