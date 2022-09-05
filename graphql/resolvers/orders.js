@@ -47,7 +47,7 @@ const ordersResolvers = {
         return user;
       } else throw new AuthenticationError("User authentication error");
     },
-    async closeOrder(_, { orderId, closedPrice, profit, userId }, context) {
+    async closeOrder(_, { orderId, closedPrice, profit, userId, closedDate }, context) {
       // const { id: userId } = checkAuth(context);
       const user = await User.findById(userId);
       if (user) {
@@ -78,7 +78,7 @@ const ordersResolvers = {
             openPrice,
             sl,
             tp,
-            closedDate: getDate(),
+            closedDate,
           });
           user.balance += Number((volume + parseFloat(profit)).toFixed(2));
           user.balance = Number(user.balance.toFixed(2));

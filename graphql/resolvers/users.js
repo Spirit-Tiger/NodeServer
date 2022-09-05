@@ -7,6 +7,11 @@ import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
 import { sendConfirmationEmail } from "../../utils/emailValidation.js";
 
 import User from "../../models/User.js";
+import Crypto from "../../models/Crypto.js";
+
+import { PubSub } from "graphql-subscriptions";
+const pubsub = new PubSub();
+
 const SECRET_KEY = "my secret";
 import {
   validateRegisterInput,
@@ -169,7 +174,6 @@ const usersResolvers = {
       if (userRole === "user") {
         sendConfirmationEmail(res.username, res.email, res.confirmationCode);
       }
-      
 
       return {
         ...res._doc,
@@ -266,6 +270,76 @@ const usersResolvers = {
       } catch (err) {
         throw new Error(err);
       }
+    },
+    async createCrypto(_, { product_id, price }) {
+      try {
+        // const crypto = await Crypto.findOne({
+        //   product_id,
+        // });
+
+        // if (!crypto) {
+        const newCrypto = new Crypto({
+          product_id,
+          price,
+        });
+        await newCrypto.save();
+        return newCrypto;
+      } catch (err) {
+        throw new Error(err);
+      }
+    },
+    async updateCryptoInfo(_, { product_id, price }) {
+      try {
+        const crypto = { product_id, price };
+        pubsub.publish("CRYPTO_UPDATED", {
+          cryptoUpdated: crypto,
+        });
+
+        return crypto;
+      } catch (err) {
+        throw new Error(err);
+      }
+    },
+    async setStopLoss(_, { orderId, sl }, context) {
+      const { id: userId } = checkAuth(context);
+      try {
+        const user = await User.findById(userId);
+        if (user) {
+          const orderIndex = user.orders.findIndex(
+            (order) => order.id === orderId
+          );
+          if (user.orders[orderIndex]) {
+            user.orders[orderIndex].sl = sl;
+            await user.save();
+            return user;
+          } else throw new UserInputError("Order is aleary closed");
+        }
+      } catch (err) {
+        throw new Error(err);
+      }
+    },
+    async setTakeProfit(_, { orderId, tp }, context) {
+      const { id: userId } = checkAuth(context);
+      try {
+        const user = await User.findById(userId);
+        if (user) {
+          const orderIndex = user.orders.findIndex(
+            (order) => order.id === orderId
+          );
+          if (user.orders[orderIndex]) {
+            user.orders[orderIndex].tp = tp;
+            await user.save();
+            return user;
+          } else throw new UserInputError("Order is aleary closed");
+        }
+      } catch (err) {
+        throw new Error(err);
+      }
+    },
+  },
+  Subscription: {
+    cryptoUpdated: {
+      subscribe: () => pubsub.asyncIterator(["CRYPTO_UPDATED"]),
     },
   },
 };

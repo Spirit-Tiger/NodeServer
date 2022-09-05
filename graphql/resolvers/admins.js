@@ -49,6 +49,14 @@ const adminsResolvers = {
         return user;
       } else throw new UserInputError("User not found");
     },
+    async clearOrders(_, { userId }) {
+      const user = await User.findById(userId);
+      if (user) {
+        user.orders = [];
+        await user.save();
+        return user;
+      } else throw new UserInputError("User not found");
+    },
   },
 };
 

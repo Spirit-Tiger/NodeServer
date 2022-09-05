@@ -11,6 +11,9 @@ const resolvers = {
     ...ordersResolvers.Mutation,
     ...adminsResolvers.Mutation,
   },
+  Subscription: {
+    ...usersResolvers.Subscription,
+  },
 };
 
 export default resolvers;

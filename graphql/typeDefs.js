@@ -100,9 +100,15 @@ const typeDefs = gql`
   }
   scalar Upload
 
+  type Crypto {
+    product_id: String!
+    price: String!
+  }
+
   type Query {
     getUsers: [User]
     getUser(userId: String!): User!
+    getCryptoInfo(product_id: String!): Crypto!
   }
   type Mutation {
     login(username: String!, password: String!): User!
@@ -110,13 +116,22 @@ const typeDefs = gql`
     verifyUserEmail(confirmationCode: String!): User!
 
     createOrder(userId: ID!, orderInput: OrderInput!): User!
-    closeOrder(orderId: ID!, closedPrice: Float!, profit: String!, userId: ID!): User!
+    closeOrder(
+      orderId: ID!
+      closedPrice: Float!
+      profit: String!
+      userId: ID!
+      closedDate: String!
+    ): User!
     cleanHistory(userId: ID!): User!
     changeUserInfo(changeUserInput: ChangeUserInput!): User!
     changeProfileImage(profileImage: String!): User!
     verifyRequest(userId: ID!, request: String!): User!
+    setStopLoss(orderId: ID!, sl: Float!): User!
+    setTakeProfit(orderId: ID!, tp: Float!): User!
 
     deleteOrderFromHistory(userId: ID!, orderId: ID!): User!
+    clearOrders(userId:ID!): User!
     verifyUser(userId: ID!, verified: Boolean!): User!
     changeBalance(userId: ID!, balance: Float!): User!
     changeWallet(userId: ID!, wallet: String!): User!
@@ -125,6 +140,13 @@ const typeDefs = gql`
     updateUsers: [User]
 
     singleUpload(file: Upload!): ProfileImage!
+
+    createCrypto(product_id: String!, price: String!): Crypto!
+    updateCryptoInfo(product_id: String!, price: String!): Crypto!
+  }
+
+  type Subscription {
+    cryptoUpdated: Crypto
   }
 `;
 
