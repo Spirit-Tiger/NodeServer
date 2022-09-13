@@ -5,6 +5,7 @@ import adminsResolvers from "./admins.js";
 const resolvers = {
   Query: {
     ...usersResolvers.Query,
+    ...adminsResolvers.Query,
   },
   Mutation: {
     ...usersResolvers.Mutation,
@@ -13,6 +14,7 @@ const resolvers = {
   },
   Subscription: {
     ...usersResolvers.Subscription,
+    ...ordersResolvers.Subscription,
   },
 };
 

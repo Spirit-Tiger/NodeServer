@@ -105,10 +105,43 @@ const typeDefs = gql`
     price: String!
   }
 
+  type LimitCheck {
+    user_id: String!
+    order_id: String!
+    symbol: String!
+    orderType: String!
+    openPrice: Float!
+    volume: Float!
+    sl: Float!
+    tp: Float!
+  }
+
+  input LimitOrderInput {
+    user_id: String!
+    order_id: String!
+    symbol: String!
+    orderType: String!
+    openPrice: Float!
+    volume: Float!
+    sl: Float!
+    tp: Float!
+  }
+
+  type Verify {
+    id: ID!
+    userId: ID!
+    profileImg: String
+    firstName: String!
+    lastName: String!
+    createdDate: String!
+  }
+
   type Query {
     getUsers: [User]
     getUser(userId: String!): User!
     getCryptoInfo(product_id: String!): Crypto!
+    getLimitOrders: [LimitCheck]
+    getVerifyRequests: [Verify]
   }
   type Mutation {
     login(username: String!, password: String!): User!
@@ -126,27 +159,40 @@ const typeDefs = gql`
     cleanHistory(userId: ID!): User!
     changeUserInfo(changeUserInput: ChangeUserInput!): User!
     changeProfileImage(profileImage: String!): User!
-    verifyRequest(userId: ID!, request: String!): User!
     setStopLoss(orderId: ID!, sl: Float!): User!
     setTakeProfit(orderId: ID!, tp: Float!): User!
+    verifyRequest(
+      userId: ID!
+      profileImg: String
+      firstName: String!
+      lastName: String!
+      createdDate: String!
+    ): Verify!
 
     deleteOrderFromHistory(userId: ID!, orderId: ID!): User!
-    clearOrders(userId:ID!): User!
-    verifyUser(userId: ID!, verified: Boolean!): User!
+    clearOrders(userId: ID!): User!
+    verifyUser(userId: ID!): User!
     changeBalance(userId: ID!, balance: Float!): User!
     changeWallet(userId: ID!, wallet: String!): User!
     changeOpenPrice(userId: ID!, orderId: ID!, changedPrice: Float!): User!
     deleteUser(userId: ID!): DeletedUser!
     updateUsers: [User]
+    updateVerifyRequest(userId:ID!, requestId:ID!, isAccepted:Boolean!): Boolean!
 
     singleUpload(file: Upload!): ProfileImage!
 
     createCrypto(product_id: String!, price: String!): Crypto!
     updateCryptoInfo(product_id: String!, price: String!): Crypto!
+
+    addLimitOrders(limitOrderInput: LimitOrderInput): LimitCheck
+    deleteLimitOrder(order_id: String!): LimitCheck!
+    updateLimitOrder(order_id: String!, sl: Float!, tp: Float!): LimitCheck!
   }
 
   type Subscription {
     cryptoUpdated: Crypto
+    limitsCheck: LimitCheck
+    orderClosed(userId: String!): User
   }
 `;
 

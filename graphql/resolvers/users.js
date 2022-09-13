@@ -17,6 +17,7 @@ import {
   validateRegisterInput,
   validateLoginInput,
 } from "../../utils/validators.js";
+import Verify from "../../models/Verify.js";
 
 function generateToken(user) {
   return jwt.sign(
@@ -300,37 +301,25 @@ const usersResolvers = {
         throw new Error(err);
       }
     },
-    async setStopLoss(_, { orderId, sl }, context) {
-      const { id: userId } = checkAuth(context);
+    async verifyRequest(
+      _,
+      { userId, profileImg, firstName, lastName, createdDate }
+    ) {
       try {
-        const user = await User.findById(userId);
-        if (user) {
-          const orderIndex = user.orders.findIndex(
-            (order) => order.id === orderId
-          );
-          if (user.orders[orderIndex]) {
-            user.orders[orderIndex].sl = sl;
-            await user.save();
-            return user;
-          } else throw new UserInputError("Order is aleary closed");
+        const request =  await Verify.findOne({userId});
+        if (!request) {
+          const verify = new Verify({
+            userId,
+            profileImg,
+            firstName,
+            lastName,
+            createdDate,
+          });
+          await verify.save();
+          return verify;
         }
-      } catch (err) {
-        throw new Error(err);
-      }
-    },
-    async setTakeProfit(_, { orderId, tp }, context) {
-      const { id: userId } = checkAuth(context);
-      try {
-        const user = await User.findById(userId);
-        if (user) {
-          const orderIndex = user.orders.findIndex(
-            (order) => order.id === orderId
-          );
-          if (user.orders[orderIndex]) {
-            user.orders[orderIndex].tp = tp;
-            await user.save();
-            return user;
-          } else throw new UserInputError("Order is aleary closed");
+        if(request){
+          return request;
         }
       } catch (err) {
         throw new Error(err);
