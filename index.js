@@ -288,8 +288,8 @@ mongoose
       ws.on("open", function () {
         ws.send(JSON.stringify(inputData));
         ws.onmessage = function (res) {
-          console.log("conected",pair.price);
           let pair = JSON.parse(res.data);
+          console.log("conected",pair.price);
           if (pair.product_id) {
             client.mutate({
               mutation: UpdateMutation,
