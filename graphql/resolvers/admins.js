@@ -119,11 +119,13 @@ const adminsResolvers = {
     },
     async deleteLimitOrder(_, { order_id }) {
       try {
-        const order = await LimitOrders.findOneAndDelete({
+        const order = await LimitOrders.findOne({
           order_id: order_id,
         });
-        console.log(order);
-        return order;
+        if (order) {
+          await order.delete();
+          return order;
+        }
       } catch (err) {
         throw new Error(err);
       }
