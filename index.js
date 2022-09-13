@@ -263,7 +263,7 @@ mongoose
     `;
 
     const ordersCheck = async () => {
-      let newArr;
+      let newArr = [];
       client
         .query({
           query: gql`
